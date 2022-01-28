@@ -49,9 +49,10 @@ exports.getUser = async (req, res) => {
         },
       ],
     })
+    console.log(foundUser)
     foundUser = JSON.parse(JSON.stringify(foundUser))
     if (foundUser.profileImage) {
-      foundUser.profileImage = IMAGE_PATH + foundUser.profileImage
+      foundUser.profileImage = process.env.PATH_FILE + foundUser.profileImage
     }
     res.status(200).send({
       status: "success",
@@ -71,6 +72,7 @@ exports.getUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const id = req.id.id
+    console.log("uploaded file")
     if (req.file) {
       console.log("Req file path", req.file.path)
       const result = await cloudinary.uploader.upload(req.file.path, {
@@ -81,7 +83,7 @@ exports.updateUser = async (req, res) => {
       console.log("result public", result)
       const toUpdate = await user.findOne({ where: { id } })
       if (toUpdate.profileImage) {
-        cloudinary.v2.uploader.destroy(
+        cloudinary.uploader.destroy(
           toUpdate.profileImage,
           function (error, result) {
             console.log(result, error)
