@@ -49,7 +49,7 @@ exports.getUser = async (req, res) => {
         },
       ],
     })
-    console.log("found user", foundUser)
+
     foundUser = JSON.parse(JSON.stringify(foundUser))
     if (foundUser.profileImage) {
       foundUser.profileImage = process.env.PATH_FILE + foundUser.profileImage
@@ -72,8 +72,8 @@ exports.getUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const id = req.id.id
+    console.log("request update executed")
     if (req.file) {
-      console.log("request update executed")
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "holyways-img",
         use_filename: true,
