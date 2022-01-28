@@ -23,7 +23,7 @@ const {
   addTransaction,
   updateTransactionStatus,
 } = require("../controllers/transaction")
-const { Testing } = require("../controllers/testing")
+// const { Testing } = require("../controllers/testing")
 
 //Middleware
 const { checkDuplicateEmail } = require("../middleware/verifyRegister")
@@ -62,6 +62,6 @@ router.post(
   addTransaction
 )
 router.patch("/transaction/:idTransaction", authJwt, updateTransactionStatus)
-router.get("/testing", Testing)
+// router.get("/testing", Testing)
 
 module.exports = router
