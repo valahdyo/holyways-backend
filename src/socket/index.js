@@ -1,5 +1,5 @@
-const { Chat, User, Transaction, Fund } = require("../../models")
-const IMAGE_PATH = "http://localhost:5000/uploads/"
+const { chat, user, fund } = require("../../models")
+const IMAGE_PATH = process.env.PATH_FILE || "http://localhost:5000/uploads"
 const jwt = require("jsonwebtoken")
 const { Op } = require("sequelize")
 const connectedUser = {}
@@ -22,24 +22,24 @@ const socketIo = (io) => {
     connectedUser[userId] = socket.id
     socket.on("load fundraiser contact", async (payload) => {
       try {
-        let fundraiserContact = await Fund.findOne({
+        let fundraiserContact = await fund.findOne({
           include: [
             {
-              model: User,
+              model: user,
               as: "userFund",
               attributes: {
                 exclude: ["createdAt", "updatedAt", "password"],
               },
               include: [
                 {
-                  model: Chat,
+                  model: chat,
                   as: "recipientMessage",
                   attributes: {
                     exclude: ["createdAt", "updatedAt"],
                   },
                 },
                 {
-                  model: Chat,
+                  model: chat,
                   as: "senderMessage",
                   attributes: {
                     exclude: ["createdAt", "updatedAt"],
@@ -69,17 +69,17 @@ const socketIo = (io) => {
 
     socket.on("load donor contacts", async (payload) => {
       try {
-        let donorContact = await User.findAll({
+        let donorContact = await user.findAll({
           include: [
             {
-              model: Chat,
+              model: chat,
               as: "recipientMessage",
               attributes: {
                 exclude: ["createdAt", "updatedAt"],
               },
             },
             {
-              model: Chat,
+              model: chat,
               as: "senderMessage",
               attributes: {
                 exclude: ["createdAt", "updatedAt"],
@@ -114,7 +114,7 @@ const socketIo = (io) => {
         const idRecipient = payload // catch recipient id sent from client
         const idSender = verified.id //id user
 
-        const data = await Chat.findAll({
+        const data = await chat.findAll({
           where: {
             idSender: {
               [Op.or]: [idRecipient, idSender],
@@ -125,14 +125,14 @@ const socketIo = (io) => {
           },
           include: [
             {
-              model: User,
+              model: user,
               as: "recipient",
               attributes: {
                 exclude: ["createdAt", "updatedAt", "password"],
               },
             },
             {
-              model: User,
+              model: user,
               as: "sender",
               attributes: {
                 exclude: ["createdAt", "updatedAt", "password"],
@@ -160,7 +160,7 @@ const socketIo = (io) => {
         const idSender = verified.id //id user
         const { message, idRecipient } = payload // catch recipient id and message sent from client
 
-        await Chat.create({
+        await chat.create({
           message,
           idRecipient,
           idSender,
