@@ -171,7 +171,7 @@ exports.deleteFund = async (req, res) => {
         path.join(__dirname, "..", "..", "uploads", toUpdate.thumbnail)
       )
     }
-    const user = await fund.destroy({
+    const foundUser = await fund.destroy({
       where: { id },
     })
     res.status(200).send({

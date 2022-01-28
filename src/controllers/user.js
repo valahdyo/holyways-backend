@@ -6,13 +6,13 @@ const IMAGE_PATH = "http://localhost:5000/uploads/"
 //Get all users
 exports.getUsers = async (req, res) => {
   try {
-    const user = await user.findAll({
+    const foundUser = await user.findAll({
       attributes: ["id", "fullName", "email"],
     })
     res.status(200).send({
       status: "success",
       data: {
-        users: user,
+        users: foundUser,
       },
     })
   } catch (error) {
@@ -26,7 +26,7 @@ exports.getUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    let user = await user.findOne({
+    let foundUser = await user.findOne({
       attributes: ["id", "fullName", "email", "phone", "profileImage"],
       where: { id: req.params.id },
       include: [
@@ -48,14 +48,14 @@ exports.getUser = async (req, res) => {
         },
       ],
     })
-    user = JSON.parse(JSON.stringify(user))
-    if (user.profileImage) {
-      user.profileImage = IMAGE_PATH + user.profileImage
+    foundUser = JSON.parse(JSON.stringify(foundUser))
+    if (foundUser.profileImage) {
+      foundUser.profileImage = IMAGE_PATH + foundUser.profileImage
     }
     res.status(200).send({
       status: "success",
       data: {
-        user: user,
+        user: foundUser,
       },
     })
   } catch (error) {
@@ -135,7 +135,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const { id } = req.params
   try {
-    const user = await user.destroy({
+    const foundUser = await user.destroy({
       where: { id },
     })
     res.status(200).send({
