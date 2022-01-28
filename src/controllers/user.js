@@ -72,11 +72,13 @@ exports.updateUser = async (req, res) => {
   try {
     const id = req.id.id
     if (req.file) {
+      console.log("Req file path", req.file.path)
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "holyways-img",
         use_filename: true,
         unique_filename: false,
       })
+      console.log("result public", result)
       const toUpdate = await user.findOne({ where: { id } })
       if (toUpdate.profileImage) {
         cloudinary.v2.uploader.destroy(
