@@ -1,6 +1,6 @@
 const fs = require("fs")
 path = require("path")
-const { User, Fund, Transaction } = require("../../models")
+const { user, fund, transaction } = require("../../models")
 
 const Joi = require("joi")
 const IMAGE_PATH = `http://localhost:5000/uploads/`
@@ -8,12 +8,12 @@ const IMAGE_PATH = `http://localhost:5000/uploads/`
 //Get all funds
 exports.getFunds = async (req, res) => {
   try {
-    let data = await Fund.findAll({
+    let data = await fund.findAll({
       include: {
-        model: Transaction,
+        model: transaction,
         as: "userDonate",
         include: {
-          model: User,
+          model: user,
           as: "userDetail",
           attributes: ["fullName", "email"],
         },
@@ -69,17 +69,17 @@ exports.addFund = async (req, res) => {
     })
 
   try {
-    const newFund = await Fund.create({
+    const newFund = await fund.create({
       ...req.body,
       thumbnail: req.file.filename,
     })
-    let data = await Fund.findOne({
+    let data = await fund.findOne({
       where: { id: newFund.id },
       include: {
-        model: Transaction,
+        model: transaction,
         as: "userDonate",
         include: {
-          model: User,
+          model: user,
           as: "userDetail",
           attributes: ["fullName", "email"],
         },
@@ -116,13 +116,13 @@ exports.addFund = async (req, res) => {
 exports.getFund = async (req, res) => {
   const { id } = req.params
   try {
-    let data = await Fund.findOne({
+    let data = await fund.findOne({
       where: { id },
       include: {
-        model: Transaction,
+        model: transaction,
         as: "userDonate",
         include: {
-          model: User,
+          model: user,
           as: "userDetail",
           attributes: ["fullName", "email"],
         },
@@ -165,13 +165,13 @@ exports.getFund = async (req, res) => {
 exports.deleteFund = async (req, res) => {
   const { id } = req.params
   try {
-    const toUpdate = await Fund.findOne({ where: { id } })
+    const toUpdate = await fund.findOne({ where: { id } })
     if (toUpdate.thumbnail) {
       fs.unlinkSync(
         path.join(__dirname, "..", "..", "uploads", toUpdate.thumbnail)
       )
     }
-    const user = await Fund.destroy({
+    const user = await fund.destroy({
       where: { id },
     })
     res.status(200).send({
@@ -194,30 +194,30 @@ exports.updateFund = async (req, res) => {
   try {
     const { id } = req.params
     if (req.file) {
-      const toUpdate = await Fund.findOne({ where: { id } })
+      const toUpdate = await fund.findOne({ where: { id } })
       if (toUpdate.thumbnail) {
         fs.unlinkSync(
           path.join(__dirname, "..", "..", "uploads", toUpdate.thumbnail)
         )
       }
-      await Fund.update(
+      await fund.update(
         { ...req.body, thumbnail: req.file.filename },
         {
           where: { id },
         }
       )
     } else {
-      await Fund.update(req.body, {
+      await fund.update(req.body, {
         where: { id },
       })
     }
-    let data = await Fund.findOne({
+    let data = await fund.findOne({
       where: { id },
       include: {
-        model: Transaction,
+        model: transaction,
         as: "userDonate",
         include: {
-          model: User,
+          model: user,
           as: "userDetail",
           attributes: ["fullName", "email"],
         },
@@ -255,24 +255,24 @@ exports.updateUserDonate = async (req, res) => {
     const { idFund, idUser, idTransaction } = req.params
 
     if (req.file) {
-      await Transaction.update(
+      await transaction.update(
         { ...req.body, proofAttachment: req.file.filename },
         {
           where: { idFund, idUser, id: idTransaction },
         }
       )
     } else {
-      await Transaction.update(req.body, {
+      await transaction.update(req.body, {
         where: { idFund, idUser, id: idTransaction },
       })
     }
-    let data = await Fund.findOne({
+    let data = await fund.findOne({
       where: { id: idFund },
       include: {
-        model: Transaction,
+        model: transaction,
         as: "userDonate",
         include: {
-          model: User,
+          model: user,
           as: "userDetail",
           attributes: ["fullName", "email"],
         },

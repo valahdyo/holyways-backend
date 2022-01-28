@@ -1,12 +1,12 @@
 const fs = require("fs")
 path = require("path")
-const { User, Fund, Transaction } = require("../../models")
+const { user, fund, transaction } = require("../../models")
 const IMAGE_PATH = "http://localhost:5000/uploads/"
 
 //Get all users
 exports.getUsers = async (req, res) => {
   try {
-    const user = await User.findAll({
+    const user = await user.findAll({
       attributes: ["id", "fullName", "email"],
     })
     res.status(200).send({
@@ -26,24 +26,24 @@ exports.getUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    let user = await User.findOne({
+    let user = await user.findOne({
       attributes: ["id", "fullName", "email", "phone", "profileImage"],
       where: { id: req.params.id },
       include: [
         {
-          model: Transaction,
+          model: transaction,
           as: "donateHistory",
           attributes: ["id", "donateAmount", "status", "createdAt"],
           include: [
             {
-              model: Fund,
+              model: fund,
               as: "fundDetail",
               attributes: ["id", "title"],
             },
           ],
         },
         {
-          model: Fund,
+          model: fund,
           as: "userFund",
         },
       ],
@@ -71,20 +71,20 @@ exports.updateUser = async (req, res) => {
   try {
     const id = req.id.id
     if (req.file) {
-      const toUpdate = await User.findOne({ where: { id } })
+      const toUpdate = await user.findOne({ where: { id } })
       if (toUpdate.profileImage) {
         fs.unlinkSync(
           path.join(__dirname, "..", "..", "uploads", toUpdate.profileImage)
         )
       }
-      await User.update(
+      await user.update(
         { ...req.body, profileImage: req.file.filename },
         {
           where: { id },
         }
       )
     } else {
-      await User.update(
+      await user.update(
         { ...req.body },
         {
           where: { id },
@@ -92,10 +92,10 @@ exports.updateUser = async (req, res) => {
       )
     }
 
-    let data = await User.findOne({
+    let data = await user.findOne({
       where: { id },
       include: {
-        model: Transaction,
+        model: transaction,
         as: "donateHistory",
         attributes: ["id", "donateAmount", "status"],
       },
@@ -135,7 +135,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   const { id } = req.params
   try {
-    const user = await User.destroy({
+    const user = await user.destroy({
       where: { id },
     })
     res.status(200).send({
@@ -156,16 +156,16 @@ exports.deleteUser = async (req, res) => {
 exports.getFundByUser = async (req, res) => {
   const { id } = req.params
   try {
-    let data = await User.findOne({
+    let data = await user.findOne({
       where: { id },
       include: {
-        model: Fund,
+        model: fund,
         as: "userFund",
         attributes: {
           exclude: ["createdAt", "updatedAt"],
         },
         include: {
-          model: Transaction,
+          model: transaction,
           as: "userDonate",
           attributes: {
             exclude: ["createdAt", "updatedAt", "proofAttachment"],

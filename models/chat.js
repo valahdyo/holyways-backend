@@ -1,7 +1,7 @@
 "use strict"
 const { Model } = require("sequelize")
 module.exports = (sequelize, DataTypes) => {
-  class Chat extends Model {
+  class chat extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,13 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Chat.belongsTo(models.User, {
+      chat.belongsTo(models.user, {
         as: "sender",
         foreignKey: {
           name: "idSender",
         },
       })
-      Chat.belongsTo(models.User, {
+      chat.belongsTo(models.user, {
         as: "recipient",
         foreignKey: {
           name: "idRecipient",
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
   }
-  Chat.init(
+  chat.init(
     {
       message: DataTypes.TEXT,
       idSender: DataTypes.INTEGER,
@@ -32,8 +32,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       tableName: "chats",
-      modelName: "Chat",
+      modelName: "chat",
     }
   )
-  return Chat
+  return chat
 }

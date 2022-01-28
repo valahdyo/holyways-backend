@@ -1,4 +1,4 @@
-const { User } = require("../../models")
+const { user } = require("../../models")
 //comment
 const Joi = require("joi")
 const bcrypt = require("bcrypt")
@@ -22,7 +22,7 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    const user = await User.findOne({
+    const user = await user.findOne({
       where: { email },
     })
     //Check password is valid
@@ -77,7 +77,7 @@ exports.registerUser = async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    const user = await User.create({
+    const user = await user.create({
       fullName,
       email,
       password: hashedPassword,
@@ -107,7 +107,7 @@ exports.registerUser = async (req, res) => {
 
 exports.checkAuth = async (req, res) => {
   try {
-    const user = await User.findOne({
+    const user = await user.findOne({
       where: { id: req.id.id },
     })
     res.status(200).send({

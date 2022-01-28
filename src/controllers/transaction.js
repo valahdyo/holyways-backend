@@ -1,5 +1,5 @@
 const Joi = require("joi")
-const { User, Fund, Transaction } = require("../../models")
+const { user, fund, transaction } = require("../../models")
 const IMAGE_PATH = `http://localhost:5000/uploads/`
 
 //Add Transaction
@@ -18,21 +18,21 @@ exports.addTransaction = async (req, res) => {
     })
 
   try {
-    await Transaction.create({
+    await transaction.create({
       ...req.body,
       proofAttachment: req.file.filename,
       idUser: req.id.id,
       idFund: req.params.idFund,
       status: "pending",
     })
-    let data = await Fund.findOne({
+    let data = await fund.findOne({
       where: { id: req.params.idFund },
       include: {
-        model: Transaction,
+        model: transaction,
         as: "userDonate",
         include: {
           as: "userDetail",
-          model: User,
+          model: user,
           attributes: ["fullName", "email"],
         },
         attributes: ["id", "donateAmount", "status", "proofAttachment"],
@@ -67,10 +67,10 @@ exports.addTransaction = async (req, res) => {
 
 exports.updateTransactionStatus = async (req, res) => {
   try {
-    await Transaction.update(req.body, {
+    await transaction.update(req.body, {
       where: { id: req.params.idTransaction },
     })
-    const data = await Transaction.findOne({
+    const data = await transaction.findOne({
       where: { id: req.params.idTransaction },
     })
 
