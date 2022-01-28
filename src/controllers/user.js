@@ -73,6 +73,7 @@ exports.updateUser = async (req, res) => {
   try {
     const id = req.id.id
     if (req.file) {
+      console.log("request update executed")
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "holyways-img",
         use_filename: true,
