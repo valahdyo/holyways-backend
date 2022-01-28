@@ -78,6 +78,7 @@ exports.updateUser = async (req, res) => {
         use_filename: true,
         unique_filename: false,
       })
+      console.log("result woi", result)
       const toUpdate = await user.findOne({ where: { id } })
       if (toUpdate.profileImage) {
         cloudinary.uploader.destroy(
