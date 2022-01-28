@@ -22,11 +22,11 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    const user = await user.findOne({
+    const newUser = await user.findOne({
       where: { email },
     })
     //Check password is valid
-    const isValid = await bcrypt.compare(password, user.password)
+    const isValid = await bcrypt.compare(password, newUser.password)
     if (!isValid) {
       return res.status(400).send({
         status: "Failed",
@@ -34,15 +34,15 @@ exports.loginUser = async (req, res) => {
       })
     }
     //Generate JWT Token when login success
-    const accessToken = jwt.sign({ id: user.id }, process.env.SECRET_TOKEN, {
+    const accessToken = jwt.sign({ id: newUser.id }, process.env.SECRET_TOKEN, {
       expiresIn: 86400, // 24 hours
     })
     res.status(200).send({
       status: "success",
       data: {
         user: {
-          id: user.id,
-          fullName: user.fullName,
+          id: newUser.id,
+          fullName: newUser.fullName,
           email,
           accessToken,
         },
@@ -77,20 +77,20 @@ exports.registerUser = async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    const user = await user.create({
+    const newUser = await user.create({
       fullName,
       email,
       password: hashedPassword,
     })
-    const accessToken = jwt.sign({ id: user.id }, process.env.SECRET_TOKEN, {
+    const accessToken = jwt.sign({ id: newUser.id }, process.env.SECRET_TOKEN, {
       expiresIn: 86400, // 24 hours
     })
     res.status(200).send({
       status: "success",
       data: {
         user: {
-          id: user.id,
-          fullName: user.fullName,
+          id: newUser.id,
+          fullName: newUser.fullName,
           email,
           accessToken,
         },
@@ -107,16 +107,16 @@ exports.registerUser = async (req, res) => {
 
 exports.checkAuth = async (req, res) => {
   try {
-    const user = await user.findOne({
+    const newUser = await user.findOne({
       where: { id: req.id.id },
     })
     res.status(200).send({
       status: "success",
       data: {
         user: {
-          id: user.id,
-          fullName: user.fullName,
-          email: user.email,
+          id: newUser.id,
+          fullName: newUser.fullName,
+          email: newUser.email,
         },
       },
     })
