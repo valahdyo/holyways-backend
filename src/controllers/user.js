@@ -1,5 +1,6 @@
 const fs = require("fs")
 path = require("path")
+const cloudinary = require("../utils/cloudinary")
 const { user, fund, transaction } = require("../../models")
 const IMAGE_PATH = "http://localhost:5000/uploads/"
 
@@ -71,14 +72,22 @@ exports.updateUser = async (req, res) => {
   try {
     const id = req.id.id
     if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "holyways-img",
+        use_filename: true,
+        unique_filename: false,
+      })
       const toUpdate = await user.findOne({ where: { id } })
       if (toUpdate.profileImage) {
-        fs.unlinkSync(
-          path.join(__dirname, "..", "..", "uploads", toUpdate.profileImage)
+        cloudinary.v2.uploader.destroy(
+          toUpdate.profileImage,
+          function (error, result) {
+            console.log(result, error)
+          }
         )
       }
       await user.update(
-        { ...req.body, profileImage: req.file.filename },
+        { ...req.body, profileImage: result.public_id },
         {
           where: { id },
         }
@@ -114,7 +123,7 @@ exports.updateUser = async (req, res) => {
     //Add Image Path to image thumbnail
     data = JSON.parse(JSON.stringify(data))
     if (data.profileImage) {
-      data.profileImage = IMAGE_PATH + data.profileImage
+      data.profileImage = process.env.PATH_FILE + data.profileImage
     }
     res.status(200).send({
       status: "success",
