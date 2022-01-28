@@ -1,5 +1,6 @@
 const fs = require("fs")
 path = require("path")
+const cloudinary = require("../utils/cloudinary")
 const { user, fund, transaction } = require("../../models")
 
 const Joi = require("joi")
@@ -26,10 +27,10 @@ exports.getFunds = async (req, res) => {
     //Add Image path to image name
     data = JSON.parse(JSON.stringify(data))
     data = data.map((trx) => {
-      trx.thumbnail = IMAGE_PATH + trx.thumbnail
+      trx.thumbnail = process.env.PATH_FILE + trx.thumbnail
       if (trx.userDonate) {
         trx.userDonate.map((user) => {
-          user.proofAttachment = IMAGE_PATH + user.proofAttachment
+          user.proofAttachment = process.env.PATH_FILE + user.proofAttachment
           return { ...user }
         })
         return { ...trx }
@@ -69,9 +70,14 @@ exports.addFund = async (req, res) => {
     })
 
   try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "holyways-img",
+      use_filename: true,
+      unique_filename: false,
+    })
     const newFund = await fund.create({
       ...req.body,
-      thumbnail: req.file.filename,
+      thumbnail: result.public_id,
     })
     let data = await fund.findOne({
       where: { id: newFund.id },
@@ -92,10 +98,10 @@ exports.addFund = async (req, res) => {
 
     //Add Image Path to image thumbnail
     data = JSON.parse(JSON.stringify(data))
-    data.thumbnail = IMAGE_PATH + data.thumbnail
+    data.thumbnail = process.env.PATH_FILE + data.thumbnail
     if (data.userDonate) {
       data.userDonate.map((user) => {
-        user.proofAttachment = IMAGE_PATH + user.proofAttachment
+        user.proofAttachment = process.env.PATH_FILE + user.proofAttachment
         return { ...user }
       })
     }
@@ -141,10 +147,10 @@ exports.getFund = async (req, res) => {
 
     //Add Image Path to image thumbnail
     data = JSON.parse(JSON.stringify(data))
-    data.thumbnail = IMAGE_PATH + data.thumbnail
+    data.thumbnail = process.env.PATH_FILE + data.thumbnail
     if (data.userDonate) {
       data.userDonate.map((user) => {
-        user.proofAttachment = IMAGE_PATH + user.proofAttachment
+        user.proofAttachment = process.env.PATH_FILE + user.proofAttachment
         return { ...user }
       })
     }
@@ -167,9 +173,9 @@ exports.deleteFund = async (req, res) => {
   try {
     const toUpdate = await fund.findOne({ where: { id } })
     if (toUpdate.thumbnail) {
-      fs.unlinkSync(
-        path.join(__dirname, "..", "..", "uploads", toUpdate.thumbnail)
-      )
+      cloudinary.uploader.destroy(toUpdate.thumbnail, function (error, result) {
+        console.log(result, error)
+      })
     }
     const foundUser = await fund.destroy({
       where: { id },
@@ -194,14 +200,22 @@ exports.updateFund = async (req, res) => {
   try {
     const { id } = req.params
     if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "holyways-img",
+        use_filename: true,
+        unique_filename: false,
+      })
       const toUpdate = await fund.findOne({ where: { id } })
       if (toUpdate.thumbnail) {
-        fs.unlinkSync(
-          path.join(__dirname, "..", "..", "uploads", toUpdate.thumbnail)
+        cloudinary.uploader.destroy(
+          toUpdate.thumbnail,
+          function (error, result) {
+            console.log(result, error)
+          }
         )
       }
       await fund.update(
-        { ...req.body, thumbnail: req.file.filename },
+        { ...req.body, thumbnail: result.public_id },
         {
           where: { id },
         }
@@ -230,10 +244,10 @@ exports.updateFund = async (req, res) => {
 
     //Add Image Path to image thumbnail
     data = JSON.parse(JSON.stringify(data))
-    data.thumbnail = IMAGE_PATH + data.thumbnail
+    data.thumbnail = process.env.PATH_FILE + data.thumbnail
     if (data.userDonate) {
       data.userDonate.map((user) => {
-        user.proofAttachment = IMAGE_PATH + user.proofAttachment
+        user.proofAttachment = process.env.PATH_FILE + user.proofAttachment
         return { ...user }
       })
     }
@@ -255,8 +269,13 @@ exports.updateUserDonate = async (req, res) => {
     const { idFund, idUser, idTransaction } = req.params
 
     if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "holyways-img",
+        use_filename: true,
+        unique_filename: false,
+      })
       await transaction.update(
-        { ...req.body, proofAttachment: req.file.filename },
+        { ...req.body, proofAttachment: result.public_id },
         {
           where: { idFund, idUser, id: idTransaction },
         }
@@ -285,10 +304,10 @@ exports.updateUserDonate = async (req, res) => {
 
     //Add Image Path to image thumbnail
     data = JSON.parse(JSON.stringify(data))
-    data.thumbnail = IMAGE_PATH + data.thumbnail
+    data.thumbnail = process.env.PATH_FILE + data.thumbnail
     if (data.userDonate) {
       data.userDonate.map((user) => {
-        user.proofAttachment = IMAGE_PATH + user.proofAttachment
+        user.proofAttachment = process.env.PATH_FILE + user.proofAttachment
         return { ...user }
       })
     }

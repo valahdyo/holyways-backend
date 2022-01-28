@@ -1,4 +1,5 @@
 const Joi = require("joi")
+const cloudinary = require("../utils/cloudinary")
 const { user, fund, transaction } = require("../../models")
 const IMAGE_PATH = `http://localhost:5000/uploads/`
 
@@ -18,9 +19,14 @@ exports.addTransaction = async (req, res) => {
     })
 
   try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "holyways-img",
+      use_filename: true,
+      unique_filename: false,
+    })
     await transaction.create({
       ...req.body,
-      proofAttachment: req.file.filename,
+      proofAttachment: result.public_id,
       idUser: req.id.id,
       idFund: req.params.idFund,
       status: "pending",
@@ -45,7 +51,7 @@ exports.addTransaction = async (req, res) => {
     data = JSON.parse(JSON.stringify(data))
     if (data.userDonate) {
       data.userDonate.map((item) => {
-        item.proofAttachment = IMAGE_PATH + req.file.filename
+        item.proofAttachment = process.env.PATH_FILE + req.file.filename
         return {
           ...item,
         }
@@ -54,7 +60,7 @@ exports.addTransaction = async (req, res) => {
     res.status(200).send({
       status: "success",
       data: {
-        fund: { ...data, thumbnail: IMAGE_PATH + data.thumbnail },
+        fund: { ...data, thumbnail: process.env.PATH_FILE + data.thumbnail },
       },
     })
   } catch (error) {
