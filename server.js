@@ -25,10 +25,7 @@ app.use("/api/v1/", router)
 app.use("/uploads", express.static("uploads"))
 
 //port
-let port = process.env.PORT
-if (port == null || port == "") {
-  port = 5000
-}
-server.listen(port, () => {
-  console.log(`Server has started on port ${port}`)
+const PORT = process.env.PORT || 5000
+server.listen(PORT, () => {
+  console.log(`Server has started on port ${PORT}`)
 })
